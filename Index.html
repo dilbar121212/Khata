@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>HisabKitab — Daily Expense & Budget Tracker</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            emerald: {
+              450: '#10b981',
+            }
+          },
+          animation: {
+            'blob': 'blob 12s infinite alternate ease-in-out',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(40px, -50px) scale(1.15)' },
+              '66%': { transform: 'translate(-30px, 30px) scale(0.9)' },
+              '100%': { transform: 'translate(20px, -20px) scale(1.05)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbars & transitions */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(71, 85, 105, 0.45);
+    }
+
+    /* Hide scrollbar for horizontal pill lists */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Smooth SVG ring transition */
+    .donut-segment {
+      transition: stroke-dasharray 0.5s cubic-bezier(0.4, 0, 0.2, 1), stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Official Light Pastel & Subtle Geometric Background */
+    .aurora-bg {
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(224, 242, 254, 0.75) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(238, 242, 255, 0.75) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(209, 250, 229, 0.55) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(254, 243, 199, 0.55) 0px, transparent 50%),
+        url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2364748b' fill-opacity='0.04' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+      background-attachment: fixed;
+    }
+    .dark .aurora-bg {
+      background-color: #0f172a;
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(56, 189, 248, 0.08) 0px, transparent 55%),
+        radial-gradient(at 90% 15%, rgba(99, 102, 241, 0.08) 0px, transparent 55%),
+        radial-gradient(at 80% 90%, rgba(16, 185, 129, 0.06) 0px, transparent 55%),
+        url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2394a3b8' fill-opacity='0.04' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+      background-attachment: fixed;
+    }
+
+    /* Clean Official Frosted Card Effect */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.80);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    @media print {
+/* ... existing code ... -->
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="aurora-bg text-slate-800 dark:text-slate-100 font-sans antialiased selection:bg-sky-500 selection:text-white transition-colors duration-300 min-h-screen flex flex-col lg:flex-row relative overflow-x-hidden">
+
+  <!-- ======================= SOFT PASTEL AMBIENT BACKGROUND ORBS ======================= -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute -top-28 -left-28 w-96 h-96 bg-sky-200/45 dark:bg-sky-500/10 rounded-full blur-3xl animate-blob"></div>
+    <div class="absolute top-1/3 -right-28 w-96 h-96 bg-indigo-200/40 dark:bg-indigo-500/10 rounded-full blur-3xl animate-blob" style="animation-delay: 3s;"></div>
+    <div class="absolute -bottom-28 left-1/4 w-96 h-96 bg-emerald-200/40 dark:bg-teal-500/10 rounded-full blur-3xl animate-blob" style="animation-delay: 6s;"></div>
+  </div>
+
+  <!-- ======================= DESKTOP SIDEBAR ======================= -->
+  <aside class="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 glass-card border-r border-slate-200/90 dark:border-slate-800 z-30 select-none">
+    <!-- Brand Logo -->
+    <div class="p-6 flex items-center justify-between border-b border-slate-200/70 dark:border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20 ring-2 ring-sky-100 dark:ring-slate-700">
+          <i class="ph-bold ph-wallet text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg tracking-tight leading-none flex items-center gap-1.5 text-slate-900 dark:text-white">
+            HisabKitab
+            <span class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded-md bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300 border border-sky-200 dark:border-sky-800 font-bold">PRO</span>
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Official Expense Manager</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Add CTA -->
+    <div class="p-4">
+      <button onclick="openTransactionModal()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-semibold shadow-md shadow-sky-600/15 hover:shadow-sky-600/25 hover:-translate-y-0.5 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+        <i class="ph-bold ph-plus-circle text-xl"></i>
+        <span>Add Transaction</span>
+      </button>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-1 px-4 space-y-1.5 overflow-y-auto">
+      <button onclick="switchTab('dashboard')" id="nav-desk-dashboard" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all">
+        <i class="ph-duotone ph-squares-four text-xl"></i>
+        <span>Dashboard Overview</span>
+      </button>
+      <button onclick="switchTab('transactions')" id="nav-desk-transactions" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all">
+        <i class="ph-duotone ph-list-dashes text-xl"></i>
+        <span>Transactions History</span>
+        <span id="sidebar-tx-count" class="ml-auto text-xs font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">0</span>
+      </button>
+      <button onclick="switchTab('analytics')" id="nav-desk-analytics" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all">
+        <i class="ph-duotone ph-chart-donut text-xl"></i>
+        <span>Visual Analytics</span>
+      </button>
+      <button onclick="switchTab('notepad')" id="nav-desk-notepad" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all">
+        <i class="ph-duotone ph-notebook text-xl"></i>
+        <span>Hisab Notepad</span>
+        <span id="sidebar-notes-count" class="ml-auto text-xs font-mono px-2 py-0.5 rounded-full bg-sky-50 dark:bg-slate-800 text-sky-700 dark:text-sky-300 font-bold">0</span>
+      </button>
+      <button onclick="switchTab('settings')" id="nav-desk-settings" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all">
+        <i class="ph-duotone ph-gear-six text-xl"></i>
+        <span>Budget & Settings</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Footer: Quick Monthly Status -->
+    <div class="p-4 m-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/70">
+      <div class="flex items-center justify-between text-xs mb-1.5">
+        <span class="text-slate-600 dark:text-slate-300 font-semibold">Monthly Budget Used</span>
+        <span id="sidebar-budget-pct" class="font-mono font-bold text-sky-600 dark:text-sky-400">0%</span>
+      </div>
+      <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden mb-2">
+        <div id="sidebar-budget-bar" class="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-500" style="width: 0%"></div>
+      </div>
+      <p id="sidebar-budget-text" class="text-[11px] text-slate-500 dark:text-slate-400 truncate font-medium">Rs. 0 left this month</p>
+    </div>
+  </aside>
+
+  <!-- ======================= MAIN CONTENT WRAPPER ======================= -->
+  <div class="flex-1 lg:pl-72 flex flex-col min-h-screen pb-24 lg:pb-10 relative z-10">
+
+    <!-- Top Header Bar -->
+    <header class="sticky top-0 z-20 glass-card border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 py-3.5">
+      <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+        <!-- Mobile Logo & Current Date -->
+        <div class="flex items-center gap-3">
+          <div class="lg:hidden w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-sm">
+            <i class="ph-bold ph-wallet text-xl"></i>
+          </div>
+          <div>
+            <h2 id="header-title" class="font-bold text-base sm:text-lg tracking-tight text-slate-800 dark:text-white">Dashboard</h2>
+            <p id="current-date-display" class="text-xs text-slate-500 dark:text-slate-400">Loading date...</p>
+          </div>
+        </div>
+
+        <!-- Right Controls: Currency, Print Report, Theme Toggle, Quick Add -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Currency Selector -->
+          <div class="relative">
+            <select id="currency-selector" onchange="changeCurrency(this.value)" aria-label="Select Currency" class="appearance-none bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-mono font-semibold pl-3 pr-7 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 transition cursor-pointer shadow-2xs">
+              <option value="PKR">🇵🇰 Rs. (PKR)</option>
+              <option value="USD">🇺🇸 $ (USD)</option>
+              <option value="GBP">🇬🇧 £ (GBP)</option>
+              <option value="EUR">🇪🇺 € (EUR)</option>
+              <option value="AED">🇦🇪 AED</option>
+            </select>
+            <i class="ph-bold ph-caret-down text-xs absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500"></i>
+          </div>
+
+          <!-- Summary Statement Modal Button -->
+          <button onclick="openSummaryModal()" title="Monthly Printable Summary" class="p-2 sm:px-3.5 sm:py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5 text-xs font-semibold shadow-2xs">
+            <i class="ph-bold ph-printer text-base text-sky-600 dark:text-sky-400"></i>
+            <span class="hidden md:inline">Statement</span>
+          </button>
+
+          <!-- Dark/Light Mode Toggle -->
+          <button onclick="toggleTheme()" id="theme-toggle-btn" title="Toggle Dark/Light Theme" class="p-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition shadow-2xs">
+            <i id="theme-icon" class="ph-bold ph-moon text-lg text-slate-700"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 space-y-6">
+
+      <!-- ======================= TAB 1: DASHBOARD ======================= -->
+      <section id="tab-dashboard" class="space-y-6">
+
+        <!-- Official Soft Light Banner -->
+        <div class="relative rounded-3xl overflow-hidden p-6 sm:p-7 bg-gradient-to-r from-sky-50 via-indigo-50/80 to-emerald-50/70 dark:from-slate-800 dark:via-slate-800/90 dark:to-slate-800 text-slate-800 dark:text-white shadow-sm border border-sky-200/70 dark:border-slate-700">
+          <!-- Subtle Decorative SVG Rings inside Banner -->
+          <svg class="absolute right-0 top-0 h-full opacity-35 dark:opacity-10 pointer-events-none" viewBox="0 0 400 200" fill="none">
+            <circle cx="320" cy="30" r="110" stroke="#0284c7" stroke-width="18" stroke-opacity="0.15" />
+            <circle cx="370" cy="170" r="90" stroke="#4f46e5" stroke-width="14" stroke-opacity="0.15" />
+            <circle cx="200" cy="190" r="60" fill="#10b981" fill-opacity="0.08" />
+          </svg>
+          <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1.5">
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 dark:bg-slate-700 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-slate-600 text-[11px] font-bold tracking-wide uppercase shadow-2xs">
+                <i class="ph-fill ph-check-circle text-emerald-500"></i>
+                <span>Official Daily Financial Record</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Daily Expense & Budget Management</h2>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl">Apne rozana ke akhrajat, mahana budget aur zaroori hisab notes ko saaf aur professional andaz mein mehfooz rakhein.</p>
+            </div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <button onclick="openTransactionModal()" class="px-5 py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-sky-600/15 transition-all flex items-center gap-2 active:scale-95">
+                <i class="ph-bold ph-plus-circle text-lg"></i>
+                <span>New Entry</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Soft Light Pastel KPI Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+          <!-- Today's Spend (Soft Rose Pastel) -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-rose-50/95 via-white to-pink-50/80 dark:from-slate-800 dark:to-slate-800/90 border border-rose-200/70 dark:border-slate-700 shadow-xs relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider">Today's Spend</span>
+              <div class="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 flex items-center justify-center">
+                <i class="ph-bold ph-receipt text-lg"></i>
+              </div>
+            </div>
+            <div id="kpi-today-spend" class="font-mono font-extrabold text-lg sm:text-2xl tracking-tight text-slate-900 dark:text-white truncate">Rs. 0</div>
+            <div id="kpi-today-count" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">0 transactions today</div>
+          </div>
+
+          <!-- This Month's Spend (Soft Amber Pastel) -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-50/95 via-white to-orange-50/80 dark:from-slate-800 dark:to-slate-800/90 border border-amber-200/70 dark:border-slate-700 shadow-xs relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider">Monthly Spend</span>
+              <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 flex items-center justify-center">
+                <i class="ph-bold ph-trend-down text-lg"></i>
+              </div>
+            </div>
+            <div id="kpi-month-spend" class="font-mono font-extrabold text-lg sm:text-2xl tracking-tight text-slate-900 dark:text-white truncate">Rs. 0</div>
+            <div id="kpi-daily-avg" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Daily avg: Rs. 0</div>
+          </div>
+
+          <!-- Total Monthly Income (Soft Emerald Pastel) -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-50/95 via-white to-teal-50/80 dark:from-slate-800 dark:to-slate-800/90 border border-emerald-200/70 dark:border-slate-700 shadow-xs relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">Monthly Income</span>
+              <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 flex items-center justify-center">
+                <i class="ph-bold ph-trend-up text-lg"></i>
+              </div>
+            </div>
+            <div id="kpi-month-income" class="font-mono font-extrabold text-lg sm:text-2xl tracking-tight text-slate-900 dark:text-white truncate">Rs. 0</div>
+            <div id="kpi-net-savings" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Net Flow: Rs. 0</div>
+          </div>
+
+          <!-- Remaining Monthly Budget (Soft Sky-Indigo Pastel) -->
+          <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-sky-50/95 via-white to-indigo-50/80 dark:from-slate-800 dark:to-slate-800/90 border border-sky-200/70 dark:border-slate-700 shadow-xs relative overflow-hidden group hover:-translate-y-0.5 transition-all duration-300">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider">Remaining Budget</span>
+              <button onclick="openBudgetEditPrompt()" title="Edit Monthly Budget" class="w-9 h-9 rounded-xl bg-sky-100 hover:bg-sky-200/80 dark:bg-sky-500/20 text-sky-600 dark:text-sky-300 flex items-center justify-center transition">
+                <i class="ph-bold ph-pencil-simple text-base"></i>
+              </button>
+            </div>
+            <div id="kpi-budget-left" class="font-mono font-extrabold text-lg sm:text-2xl tracking-tight text-slate-900 dark:text-white truncate">Rs. 0</div>
+            <div id="kpi-budget-limit" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium">of Rs. 85,000 limit</div>
+          </div>
+        </div>
+
+        <!-- Interactive Monthly Budget Progress Bar Card -->
+        <div class="p-5 rounded-3xl glass-card">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2.5">
+              <span id="budget-status-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Safe Track
+              </span>
+              <h3 class="font-bold text-sm sm:text-base">Monthly Budget Utilization</h3>
+            </div>
+            <div class="flex items-center gap-3">
+              <span id="budget-ratio-text" class="text-xs sm:text-sm font-mono font-bold text-purple-600 dark:text-purple-300">0% used</span>
+              <button onclick="openBudgetEditPrompt()" class="text-xs text-fuchsia-600 dark:text-fuchsia-400 hover:underline font-bold">Adjust Limit</button>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full h-4 rounded-full bg-slate-200/70 dark:bg-slate-800/90 overflow-hidden p-0.5 border border-white/50 dark:border-slate-700">
+            <div id="main-budget-bar" class="h-full rounded-full bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 transition-all duration-500" style="width: 0%"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-300 mt-2.5 font-medium">
+            <span id="budget-warning-msg">You are well within your monthly spending limit.</span>
+            <span id="budget-safe-daily" class="font-mono font-bold text-indigo-600 dark:text-indigo-400">Safe daily spend: Rs. 0/day</span>
+          </div>
+        </div>
+
+        <!-- Quick-Tap Preset Pills (1-Click or Instant Pre-fill) -->
+        <div class="p-4 sm:p-5 rounded-3xl glass-card">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-400 to-orange-500 text-white flex items-center justify-center shadow-sm">
+                <i class="ph-fill ph-lightning text-sm"></i>
+              </div>
+              <h3 class="font-bold text-sm">Quick-Tap Daily Presets</h3>
+              <span class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">— Ek click mein rozana ka kharcha add karein</span>
+            </div>
+            <button onclick="openTransactionModal()" class="text-xs font-bold text-fuchsia-600 dark:text-fuchsia-400 hover:underline flex items-center gap-1">
+              <span>Custom Entry</span>
+              <i class="ph-bold ph-arrow-right"></i>
+            </button>
+          </div>
+          <div id="quick-presets-container" class="flex items-center gap-2.5 overflow-x-auto no-scrollbar pb-1">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Middle Grid: 7-Day Trend + Category Snapshot -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Last 7 Days Bar Chart (7 cols) -->
+          <div class="lg:col-span-7 p-5 rounded-3xl glass-card flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-base">Last 7 Days Spending</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Pichlay 7 dinon ka kharcha گراف</p>
+              </div>
+              <div class="text-right px-3 py-1.5 rounded-2xl bg-purple-500/10 border border-purple-500/20">
+                <span class="text-[10px] text-purple-600 dark:text-purple-300 font-semibold block uppercase">7-Day Total</span>
+                <span id="seven-day-total" class="font-mono font-extrabold text-sm text-purple-700 dark:text-purple-200">Rs. 0</span>
+              </div>
+            </div>
+
+            <!-- Bar Chart Container -->
+            <div id="seven-day-chart" class="h-48 pt-6 pb-2 px-1 flex items-end justify-between gap-2 sm:gap-4 border-b border-slate-200/60 dark:border-slate-800/80">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Top Spending Categories Mini Breakdown (5 cols) -->
+          <div class="lg:col-span-5 p-5 rounded-3xl glass-card flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-base">Top Categories</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Sab se zyada kharcha kahan hua</p>
+              </div>
+              <button onclick="switchTab('analytics')" class="text-xs text-fuchsia-600 dark:text-fuchsia-400 hover:underline font-bold flex items-center gap-1">
+                <span>Full Chart</span>
+                <i class="ph-bold ph-chart-pie-slice"></i>
+              </button>
+            </div>
+            <div id="dashboard-top-categories" class="space-y-3.5 flex-1 flex flex-col justify-center">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions Preview -->
+        <div class="p-5 rounded-3xl glass-card">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-base">Recent Activity</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Aap ke taaza tareen kharchay aur aamdani</p>
+            </div>
+            <button onclick="switchTab('transactions')" class="px-3.5 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 text-xs font-bold transition flex items-center gap-1.5">
+              <span>View All</span>
+              <i class="ph-bold ph-caret-right"></i>
+            </button>
+          </div>
+
+          <div id="dashboard-recent-list" class="divide-y divide-slate-200/50 dark:divide-slate-800/70">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= TAB 2: TRANSACTIONS HISTORY ======================= -->
+      <section id="tab-transactions" class="hidden space-y-5">
+        <!-- Filter & Search Bar Card -->
+        <div class="p-4 sm:p-5 rounded-3xl glass-card space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <!-- Date Period Segment Buttons -->
+            <div class="flex items-center bg-slate-200/60 dark:bg-slate-800/80 p-1 rounded-2xl overflow-x-auto no-scrollbar">
+              <button onclick="setFilterPeriod('all')" data-period="all" class="filter-period-btn flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap">All Time</button>
+              <button onclick="setFilterPeriod('today')" data-period="today" class="filter-period-btn flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap">Today</button>
+              <button onclick="setFilterPeriod('week')" data-period="week" class="filter-period-btn flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap">This Week</button>
+              <button onclick="setFilterPeriod('month')" data-period="month" class="filter-period-btn flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap">This Month</button>
+            </div>
+
+            <!-- Export CSV & Add New -->
+            <div class="flex items-center gap-2">
+              <button onclick="exportTransactionsCSV()" class="px-3.5 py-2 rounded-xl bg-white/80 dark:bg-slate-800 hover:bg-white text-xs font-bold flex items-center gap-1.5 transition border border-purple-500/20">
+                <i class="ph-bold ph-download-simple text-fuchsia-500 text-sm"></i>
+                <span>Export CSV</span>
+              </button>
+              <button onclick="openTransactionModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-purple-500/20 transition">
+                <i class="ph-bold ph-plus text-sm"></i>
+                <span>Add New</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Search, Category & Type Filters -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+            <!-- Search Input -->
+            <div class="sm:col-span-6 relative">
+              <i class="ph-bold ph-magnifying-glass text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="filter-search" oninput="renderTransactionsTab()" placeholder="Search by title, note, or payment method..." class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/70 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
+            </div>
+
+            <!-- Category Select -->
+            <div class="sm:col-span-3">
+              <select id="filter-category" onchange="renderTransactionsTab()" class="w-full px-3 py-2.5 rounded-xl bg-white/70 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500">
+                <option value="ALL">All Categories</option>
+              </select>
+            </div>
+
+            <!-- Type Select -->
+            <div class="sm:col-span-3">
+              <select id="filter-type" onchange="renderTransactionsTab()" class="w-full px-3 py-2.5 rounded-xl bg-white/70 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500">
+                <option value="ALL">All Types (Inc & Exp)</option>
+                <option value="expense">Expenses Only</option>
+                <option value="income">Income Only</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Filtered Summary Strip -->
+          <div class="pt-3 border-t border-slate-200/60 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span id="filtered-count-label" class="text-slate-500 dark:text-slate-400 font-medium">Showing 0 transactions</span>
+            <div class="flex items-center gap-4 font-mono">
+              <span>Out: <strong id="filtered-expense-sum" class="text-rose-500">Rs. 0</strong></span>
+              <span>In: <strong id="filtered-income-sum" class="text-emerald-500">Rs. 0</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transactions List Container -->
+        <div class="rounded-3xl glass-card overflow-hidden">
+          <div id="full-transactions-list" class="divide-y divide-slate-200/50 dark:divide-slate-800/70">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= TAB 3: VISUAL ANALYTICS ======================= -->
+      <section id="tab-analytics" class="hidden space-y-6">
+        <!-- Period Selector for Analytics -->
+        <div class="flex flex-wrap items-center justify-between gap-3 glass-card p-4 rounded-3xl">
+          <div>
+            <h3 class="font-bold text-base">Spending Breakdown & Analytics</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Interactive category distribution and payment channel insights</p>
+          </div>
+          <div class="flex items-center bg-slate-200/60 dark:bg-slate-800 p-1 rounded-xl">
+            <button onclick="setAnalyticsScope('month')" id="ana-scope-month" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-fuchsia-600 to-indigo-600 text-white transition">This Month</button>
+            <button onclick="setAnalyticsScope('all')" id="ana-scope-all" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 transition">All Time</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Interactive SVG Donut Chart Card (5 cols) -->
+          <div class="lg:col-span-5 p-6 rounded-3xl glass-card flex flex-col items-center justify-center">
+            <h4 class="font-bold text-sm self-start mb-2">Expense Share by Category</h4>
+            <div class="relative w-60 h-60 my-4 flex items-center justify-center">
+              <svg id="analytics-donut-svg" viewBox="0 0 42 42" class="w-full h-full -rotate-90 transform">
+                <!-- Populated by JS -->
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 pointer-events-none">
+                <span id="donut-center-label" class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Total Spent</span>
+                <span id="donut-center-amount" class="font-mono font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-0.5">Rs. 0</span>
+                <span id="donut-center-sub" class="text-[11px] text-fuchsia-500 font-bold mt-0.5">100%</span>
+              </div>
+            </div>
+            <!-- Legend Pills -->
+            <div id="analytics-donut-legend" class="w-full grid grid-cols-2 gap-2 mt-2 text-xs">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Horizontal Category Progress Bars (7 cols) -->
+          <div class="lg:col-span-7 p-6 rounded-3xl glass-card flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="font-bold text-sm">Category-Wise Ranking</h4>
+              <span class="text-xs text-slate-400 font-mono">Amount & % Share</span>
+            </div>
+            <div id="analytics-category-bars" class="space-y-4 flex-1">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Method Breakdown -->
+        <div class="p-6 rounded-3xl glass-card">
+          <h4 class="font-bold text-sm mb-4">Spending by Payment Channel (Cash, EasyPaisa/JazzCash, Bank, Card)</h4>
+          <div id="analytics-payment-cards" class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= TAB 3.5: HISAB NOTEPAD ======================= -->
+      <section id="tab-notepad" class="hidden space-y-6">
+        <!-- Notepad Header & Quick Editor Card -->
+        <div class="p-5 sm:p-6 rounded-3xl glass-card space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-pink-500/30">
+                <i class="ph-bold ph-notebook text-2xl"></i>
+              </div>
+              <div>
+                <h3 class="font-extrabold text-base sm:text-lg">Smart Hisab Notepad & Shopping List</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Rozana ka sauda list, udhaar yaad-dihani aur zaroori hisab notes yahan likhein</p>
+              </div>
+            </div>
+            <!-- Search Notes -->
+            <div class="relative w-full sm:w-64">
+              <i class="ph-bold ph-magnifying-glass text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="note-search-input" oninput="renderNotepadTab()" placeholder="Search notes..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-white/80 dark:bg-slate-800/90 border border-purple-500/20 dark:border-slate-700 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
+            </div>
+          </div>
+
+          <!-- Add / Edit Note Form -->
+          <form id="notepad-form" onsubmit="handleSaveNote(event)" class="p-4 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-purple-500/20 dark:border-slate-800 space-y-3">
+            <input type="hidden" id="note-edit-id" value="" />
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              <div class="sm:col-span-8">
+                <input type="text" id="note-title" required maxlength="60" placeholder="Note Title (maslan: Mahana Ration List, Dukan Udhaar, Committee Hisab)..." class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
+              </div>
+              <div class="sm:col-span-4 flex items-center justify-between sm:justify-end gap-2 px-1">
+                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Card Color:</span>
+                <div class="flex items-center gap-1.5" id="note-color-picker">
+                  <button type="button" onclick="selectNoteColor('rose')" data-ncolor="rose" class="note-color-btn w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 ring-2 ring-offset-2 ring-fuchsia-500 transition"></button>
+                  <button type="button" onclick="selectNoteColor('amber')" data-ncolor="amber" class="note-color-btn w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 transition"></button>
+                  <button type="button" onclick="selectNoteColor('emerald')" data-ncolor="emerald" class="note-color-btn w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 transition"></button>
+                  <button type="button" onclick="selectNoteColor('violet')" data-ncolor="violet" class="note-color-btn w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 transition"></button>
+                  <button type="button" onclick="selectNoteColor('cyan')" data-ncolor="cyan" class="note-color-btn w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 transition"></button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <textarea id="note-content" rows="3" required placeholder="Apna mukammal note ya shopping list yahan tafseel se likhein..." class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-fuchsia-500 resize-y"></textarea>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none font-semibold text-fuchsia-600 dark:text-fuchsia-400">
+                  <input type="checkbox" id="note-pinned" class="rounded text-fuchsia-600 focus:ring-fuchsia-500" />
+                  <i class="ph-fill ph-push-pin"></i>
+                  <span>Pin to Top</span>
+                </label>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" id="note-cancel-edit-btn" onclick="resetNoteForm()" class="hidden px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-xs font-bold transition">
+                  Cancel
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-purple-500/25 flex items-center gap-1.5 transition active:scale-95">
+                  <i class="ph-bold ph-floppy-disk text-base"></i>
+                  <span id="note-submit-label">Save Note</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Saved Notes Grid -->
+        <div id="notes-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ======================= TAB 4: SETTINGS & CUSTOMIZATION ======================= -->
+      <section id="tab-settings" class="hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- Budget & Localization Card -->
+          <div class="p-6 rounded-3xl glass-card space-y-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-fuchsia-500 to-indigo-500 text-white flex items-center justify-center shadow-md">
+                <i class="ph-bold ph-sliders-horizontal text-xl"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-base">Monthly Budget & Currency</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Set your spending cap and default display currency</p>
+              </div>
+            </div>
+
+            <div class="space-y-4 pt-2">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Monthly Spending Target / Limit</label>
+                <div class="flex gap-2">
+                  <input type="number" id="settings-budget-input" min="1" step="any" class="flex-1 px-4 py-2.5 rounded-xl bg-white/80 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500" placeholder="85000" />
+                  <button onclick="saveBudgetFromSettings()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 text-white font-bold text-xs transition shadow-md">
+                    Save Target
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Active Currency Symbol</label>
+                <div class="grid grid-cols-5 gap-2">
+                  <button onclick="changeCurrency('PKR')" data-curr="PKR" class="curr-option-btn py-2.5 rounded-xl border text-xs font-mono font-semibold transition">Rs. PKR</button>
+                  <button onclick="changeCurrency('USD')" data-curr="USD" class="curr-option-btn py-2.5 rounded-xl border text-xs font-mono font-semibold transition">$ USD</button>
+                  <button onclick="changeCurrency('GBP')" data-curr="GBP" class="curr-option-btn py-2.5 rounded-xl border text-xs font-mono font-semibold transition">£ GBP</button>
+                  <button onclick="changeCurrency('EUR')" data-curr="EUR" class="curr-option-btn py-2.5 rounded-xl border text-xs font-mono font-semibold transition">€ EUR</button>
+                  <button onclick="changeCurrency('AED')" data-curr="AED" class="curr-option-btn py-2.5 rounded-xl border text-xs font-mono font-semibold transition">AED</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom Category Creator Card -->
+          <div class="p-6 rounded-3xl glass-card space-y-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-pink-500 text-white flex items-center justify-center shadow-md">
+                <i class="ph-bold ph-tag text-xl"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-base">Add Custom Category</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Create personalized categories for your lifestyle</p>
+              </div>
+            </div>
+
+            <form onsubmit="handleAddCustomCategory(event)" class="space-y-3 pt-1">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Category Name</label>
+                  <input type="text" id="custom-cat-name" required maxlength="28" placeholder="e.g., Gym & Fitness, Charity, Tuition" class="w-full px-3.5 py-2.5 rounded-xl bg-white/80 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Type</label>
+                  <select id="custom-cat-type" class="w-full px-3 py-2.5 rounded-xl bg-white/80 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500">
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 pt-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs text-slate-400 mr-1">Color:</span>
+                  <input type="color" id="custom-cat-color" value="#ec4899" class="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0" />
+                </div>
+                <button type="submit" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+                  <i class="ph-bold ph-plus"></i>
+                  <span>Create Category</span>
+                </button>
+              </div>
+            </form>
+
+            <!-- Custom Categories Pills List -->
+            <div class="pt-2">
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Available Categories</span>
+              <div id="settings-categories-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Management, Export & Demo Reset Card -->
+        <div class="p-6 rounded-3xl glass-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 class="font-bold text-base">Data Persistence & Management</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">All records are saved locally in your browser's <code class="font-mono text-fuchsia-500 font-semibold">localStorage</code>. Export or reset anytime.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button onclick="exportTransactionsCSV()" class="px-4 py-2.5 rounded-xl bg-white/80 dark:bg-slate-800 hover:bg-white text-xs font-bold flex items-center gap-2 transition border border-purple-500/20">
+                <i class="ph-bold ph-file-csv text-emerald-500 text-base"></i>
+                <span>Export CSV</span>
+              </button>
+              <button onclick="restoreDemoData()" class="px-4 py-2.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-500 border border-indigo-500/30 text-xs font-bold flex items-center gap-2 transition">
+                <i class="ph-bold ph-arrows-counter-clockwise text-base"></i>
+                <span>Reload Sample Data</span>
+              </button>
+              <button onclick="openClearDataConfirm()" class="px-4 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-500 border border-rose-500/30 text-xs font-bold flex items-center gap-2 transition">
+                <i class="ph-bold ph-trash text-base"></i>
+                <span>Clear All Data</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ======================= MOBILE BOTTOM NAVIGATION ======================= -->
+  <nav class="lg:hidden fixed bottom-0 inset-x-0 z-30 glass-card border-t border-slate-200/80 dark:border-slate-800 px-2 py-1.5 flex items-center justify-around select-none">
+    <button onclick="switchTab('dashboard')" id="nav-mob-dashboard" class="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-xs font-medium transition">
+      <i class="ph-duotone ph-squares-four text-xl mb-0.5"></i>
+      <span class="text-[10px]">Home</span>
+    </button>
+    <button onclick="switchTab('transactions')" id="nav-mob-transactions" class="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-xs font-medium transition">
+      <i class="ph-duotone ph-list-dashes text-xl mb-0.5"></i>
+      <span class="text-[10px]">History</span>
+    </button>
+
+    <!-- Center Floating Add Button -->
+    <button onclick="openTransactionModal()" aria-label="Add Transaction" class="-mt-7 w-13 h-13 p-3 rounded-2xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white shadow-lg shadow-sky-600/30 active:scale-95 transition flex items-center justify-center border-4 border-white dark:border-slate-900">
+      <i class="ph-bold ph-plus text-xl"></i>
+    </button>
+
+    <button onclick="switchTab('notepad')" id="nav-mob-notepad" class="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-xs font-medium transition">
+      <i class="ph-duotone ph-notebook text-xl mb-0.5"></i>
+      <span class="text-[10px]">Notepad</span>
+    </button>
+    <button onclick="switchTab('analytics')" id="nav-mob-analytics" class="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-xs font-medium transition">
+      <i class="ph-duotone ph-chart-donut text-xl mb-0.5"></i>
+      <span class="text-[10px]">Analytics</span>
+    </button>
+    <button onclick="switchTab('settings')" id="nav-mob-settings" class="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-xs font-medium transition">
+      <i class="ph-duotone ph-gear-six text-xl mb-0.5"></i>
+      <span class="text-[10px]">Settings</span>
+    </button>
+  </nav>
+
+  <!-- ======================= ADD / EDIT TRANSACTION MODAL ======================= -->
+  <div id="transaction-modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-950/70 backdrop-blur-xs p-0 sm:p-4">
+    <div class="w-full max-w-lg rounded-t-3xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200 max-h-[92vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <h3 id="tx-modal-title" class="font-bold text-base sm:text-lg">Add Transaction</h3>
+        <button onclick="closeTransactionModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-500">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+
+      <!-- Modal Form Body -->
+      <form id="tx-form" onsubmit="handleSaveTransaction(event)" class="p-6 space-y-4 overflow-y-auto">
+        <input type="hidden" id="tx-edit-id" value="" />
+
+        <!-- Expense / Income Toggle -->
+        <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800">
+          <button type="button" id="type-btn-expense" onclick="setFormType('expense')" class="py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition">
+            <i class="ph-bold ph-arrow-up-right"></i>
+            <span>Expense</span>
+          </button>
+          <button type="button" id="type-btn-income" onclick="setFormType('income')" class="py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition">
+            <i class="ph-bold ph-arrow-down-left"></i>
+            <span>Income</span>
+          </button>
+        </div>
+
+        <!-- Amount & Date Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <div class="sm:col-span-7">
+            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Amount (<span id="modal-currency-label">Rs.</span>) *</label>
+            <input type="number" id="tx-amount" required min="1" step="any" placeholder="0" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 font-mono font-bold text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div class="sm:col-span-5">
+            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Date *</label>
+            <input type="date" id="tx-date" required class="w-full px-3.5 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+
+        <!-- Title / Note -->
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Title / Description *</label>
+          <input type="text" id="tx-title" required maxlength="60" placeholder="e.g., Fresh Milk & Bread, PSO Petrol, Jazz Monthly Data" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <!-- Category Selector Grid -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400">Select Category *</label>
+            <button type="button" onclick="closeTransactionModal(); switchTab('settings');" class="text-[11px] text-emerald-500 hover:underline">+ Custom Category</button>
+          </div>
+          <div id="modal-category-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-44 overflow-y-auto p-0.5">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Payment Method Pills -->
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Payment Method</label>
+          <div id="modal-payment-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-2 flex items-center gap-3">
+          <button type="button" onclick="closeTransactionModal()" class="w-1/3 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs sm:text-sm font-semibold transition">
+            Cancel
+          </button>
+          <button type="submit" class="w-2/3 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2">
+            <i class="ph-bold ph-check-circle text-lg"></i>
+            <span id="tx-submit-label">Save Transaction</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================= BUDGET LIMIT PROMPT MODAL ======================= -->
+  <div id="budget-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
+    <div class="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base">Update Monthly Budget</h3>
+        <button onclick="closeBudgetPrompt()" class="text-slate-400 hover:text-slate-200"><i class="ph-bold ph-x"></i></button>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Set your target monthly spending cap to receive color-coded progress alerts.</p>
+      <input type="number" id="modal-budget-input" min="1" step="any" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono font-bold text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+      <div class="flex justify-end gap-2">
+        <button onclick="closeBudgetPrompt()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold">Cancel</button>
+        <button onclick="saveBudgetFromModal()" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold">Update Limit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= CONFIRM CLEAR DATA MODAL ======================= -->
+  <div id="confirm-clear-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
+    <div class="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-2xl space-y-4 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto">
+        <i class="ph-bold ph-warning-octagon text-2xl"></i>
+      </div>
+      <h3 class="font-bold text-base">Clear All Transactions?</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400">This will remove all current transactions so you can start with a clean slate. You can reload demo data anytime from Settings.</p>
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeClearDataConfirm()" class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold">Cancel</button>
+        <button onclick="confirmClearAllData()" class="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold">Yes, Clear All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= PRINTABLE / SHAREABLE STATEMENT MODAL ======================= -->
+  <div id="summary-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/75 backdrop-blur-xs p-4 overflow-y-auto">
+    <div class="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-8">
+      <!-- Non-Print Action Header -->
+      <div class="no-print px-6 py-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="ph-bold ph-Receipt text-emerald-500 text-lg"></i>
+          <span class="font-bold text-sm">Monthly Expense Statement</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="copySummaryToClipboard()" class="px-3 py-1.5 rounded-xl bg-slate-200/80 dark:bg-slate-700 hover:bg-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-copy"></i>
+            <span>Copy Text</span>
+          </button>
+          <button onclick="window.print()" class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="ph-bold ph-printer"></i>
+            <span>Print / Save PDF</span>
+          </button>
+          <button onclick="closeSummaryModal()" class="w-8 h-8 rounded-xl bg-slate-200/70 dark:bg-slate-800 flex items-center justify-center">
+            <i class="ph-bold ph-x"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Area -->
+      <div id="printableArea" class="p-6 sm:p-8 space-y-6">
+        <div class="flex items-start justify-between border-b border-slate-200 dark:border-slate-800 pb-5">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight">HisabKitab — Financial Summary</h2>
+            <p id="print-period-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Statement Period: Current Month</p>
+          </div>
+          <div class="text-right font-mono text-xs text-slate-500">
+            <div id="print-generated-date">Generated: Today</div>
+            <div>Status: Verified Local Record</div>
+          </div>
+        </div>
+
+        <!-- Summary Figures -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
+            <span class="text-[11px] text-slate-500 block">Total Income</span>
+            <strong id="print-income" class="font-mono text-sm sm:text-base text-emerald-500">Rs. 0</strong>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
+            <span class="text-[11px] text-slate-500 block">Total Expenses</span>
+            <strong id="print-expense" class="font-mono text-sm sm:text-base text-rose-500">Rs. 0</strong>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
+            <span class="text-[11px] text-slate-500 block">Monthly Budget</span>
+            <strong id="print-budget" class="font-mono text-sm sm:text-base">Rs. 0</strong>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
+            <span class="text-[11px] text-slate-500 block">Net Balance</span>
+            <strong id="print-balance" class="font-mono text-sm sm:text-base">Rs. 0</strong>
+          </div>
+        </div>
+
+        <!-- Category Table -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Category Breakdown (This Month)</h4>
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-500">
+                <th class="py-2 font-semibold">Category</th>
+                <th class="py-2 font-semibold text-right">Transactions</th>
+                <th class="py-2 font-semibold text-right">Share</th>
+                <th class="py-2 font-semibold text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="print-category-rows" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= TOAST NOTIFICATION ======================= -->
+  <div id="toast-container" class="fixed bottom-20 lg:bottom-6 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ======================= APPLICATION JAVASCRIPT ======================= -->
+  <script>
+    /********************************************************************
+     * 1. CONSTANTS, CURRENCIES, CATEGORIES & PRESETS
+     ********************************************************************/
+    const STORAGE_KEY = 'hisabkitab_tracker_v1';
+
+    const CURRENCY_MAP = {
+      PKR: { symbol: 'Rs.', code: 'PKR', locale: 'en-PK' },
+      USD: { symbol: '$',   code: 'USD', locale: 'en-US' },
+      GBP: { symbol: '£',   code: 'GBP', locale: 'en-GB' },
+      EUR: { symbol: '€',   code: 'EUR', locale: 'de-DE' },
+      AED: { symbol: 'AED', code: 'AED', locale: 'en-AE' }
+    };
+
+    const DEFAULT_CATEGORIES = [
+      { id: 'groceries',     name: 'Groceries & Food',       type: 'expense', icon: 'ph-shopping-cart',       color: '#10b981' },
+      { id: 'fuel',          name: 'Fuel & Transport',       type: 'expense', icon: 'ph-gas-pump',            color: '#f59e0b' },
+      { id: 'utilities',     name: 'Utilities & Internet',   type: 'expense', icon: 'ph-wifi-high',           color: '#3b82f6' },
+      { id: 'ai_subs',       name: 'AI & Software Subs',     type: 'expense', icon: 'ph-robot',               color: '#8b5cf6' },
+      { id: 'dining',        name: 'Dining Out & Tea',       type: 'expense', icon: 'ph-coffee',              color: '#f97316' },
+      { id: 'medical',       name: 'Medical & Health',       type: 'expense', icon: 'ph-first-aid-kit',       color: '#ef4444' },
+      { id: 'home',          name: 'Home & Maintenance',     type: 'expense', icon: 'ph-house-line',          color: '#14b8a6' },
+      { id: 'shopping',      name: 'Shopping & Personal',    type: 'expense', icon: 'ph-shopping-bag',        color: '#ec4899' },
+      { id: 'salary',        name: 'Salary & Income',        type: 'income',  icon: 'ph-money',               color: '#22c55e' }
+    ];
+
+    const PAYMENT_METHODS = [
+      { id: 'Cash',         label: 'Cash',            icon: 'ph-money' },
+      { id: 'EasyPaisa',    label: 'EasyPaisa/Jazz',  icon: 'ph-device-mobile-camera' },
+      { id: 'Bank',         label: 'Bank Transfer',   icon: 'ph-bank' },
+      { id: 'Card',         label: 'Debit/Credit',    icon: 'ph-credit-card' }
+    ];
+
+    const QUICK_PRESETS = [
+      { title: 'Chai & Snacks',       amount: 250,  category: 'dining',    method: 'Cash',      icon: 'ph-coffee' },
+      { title: 'Bike / Car Fuel',     amount: 1500, category: 'fuel',      method: 'Cash',      icon: 'ph-gas-pump' },
+      { title: 'Daily Milk & Bread',  amount: 480,  category: 'groceries', method: 'Cash',      icon: 'ph-shopping-cart' },
+      { title: 'Mobile Data Package', amount: 1200, category: 'utilities', method: 'EasyPaisa', icon: 'ph-device-mobile' },
+      { title: 'Lunch / Biryani',     amount: 650,  category: 'dining',    method: 'EasyPaisa', icon: 'ph-bowl-food' },
+      { title: 'Veg & Fruits Market', amount: 1100, category: 'groceries', method: 'Cash',      icon: 'ph-carrot' }
+    ];
+
+    /********************************************************************
+     * 2. STATE MANAGEMENT & LOCAL STORAGE
+     ********************************************************************/
+    let state = {
+      currency: 'PKR',
+      monthlyBudget: 85000,
+      theme: 'light',
+      activeTab: 'dashboard',
+      filterPeriod: 'all',
+      analyticsScope: 'month',
+      formType: 'expense',
+      selectedCategory: 'groceries',
+      selectedPayment: 'Cash',
+      selectedNoteColor: 'rose',
+      customCategories: [],
+      transactions: [],
+      notes: []
+    };
+
+    const NOTE_COLOR_THEMES = {
+      rose:    { badge: 'bg-rose-500 text-white',    border: 'border-rose-200 dark:border-rose-500/30',       bg: 'from-rose-50/90 via-white to-pink-50/60 dark:from-rose-500/10 dark:via-slate-800/90 dark:to-slate-900' },
+      amber:   { badge: 'bg-amber-500 text-white',   border: 'border-amber-200 dark:border-amber-500/30',     bg: 'from-amber-50/90 via-white to-orange-50/60 dark:from-amber-500/10 dark:via-slate-800/90 dark:to-slate-900' },
+      emerald: { badge: 'bg-emerald-500 text-white', border: 'border-emerald-200 dark:border-emerald-500/30', bg: 'from-emerald-50/90 via-white to-teal-50/60 dark:from-emerald-500/10 dark:via-slate-800/90 dark:to-slate-900' },
+      violet:  { badge: 'bg-indigo-500 text-white',  border: 'border-indigo-200 dark:border-indigo-500/30',   bg: 'from-indigo-50/90 via-white to-violet-50/60 dark:from-indigo-500/10 dark:via-slate-800/90 dark:to-slate-900' },
+      cyan:    { badge: 'bg-sky-500 text-white',     border: 'border-sky-200 dark:border-sky-500/30',         bg: 'from-sky-50/90 via-white to-cyan-50/60 dark:from-sky-500/10 dark:via-slate-800/90 dark:to-slate-900' }
+    };
+
+    function createSampleNotes() {
+/* ... existing code ... -->
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          state = { ...state, ...parsed, theme: 'light' };
+          if (!Array.isArray(state.notes) || state.notes.length === 0) {
+            state.notes = createSampleNotes();
+          }
+        } else {
+          state.transactions = createSampleTransactions();
+          state.notes = createSampleNotes();
+          state.theme = 'light';
+          saveState();
+        }
+      } catch (e) {
+        console.error('Error reading localStorage:', e);
+        state.transactions = createSampleTransactions();
+        state.notes = createSampleNotes();
+        state.theme = 'light';
+      }
+    }
+
+    function saveState() {
+/* ... existing code ... -->
+      tabs.forEach(t => {
+        const sec = document.getElementById(`tab-${t}`);
+        if (sec) sec.classList.toggle('hidden', t !== tabId);
+
+        // Desktop sidebar highlight
+        const deskBtn = document.getElementById(`nav-desk-${t}`);
+        if (deskBtn) {
+          if (t === tabId) {
+            deskBtn.className = 'w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-bold text-sm bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-200/80 dark:border-sky-500/30 shadow-2xs transition-all';
+          } else {
+            deskBtn.className = 'w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all';
+          }
+        }
+
+        // Mobile bottom bar highlight
+        const mobBtn = document.getElementById(`nav-mob-${t}`);
+        if (mobBtn) {
+          if (t === tabId) {
+            mobBtn.className = 'flex flex-col items-center justify-center py-1 px-3 rounded-xl text-xs font-bold text-sky-600 dark:text-sky-400 transition';
+          } else {
+            mobBtn.className = 'flex flex-col items-center justify-center py-1 px-3 rounded-xl text-xs font-medium text-slate-500 dark:text-slate-400 transition';
+          }
+        }
+      });
+
+      refreshAllViews();
+    }
+
+    function changeCurrency(newCurr) {
+/* ... existing code ... -->
+      const budgetLeftEl = document.getElementById('kpi-budget-left');
+      budgetLeftEl.textContent = budgetRemaining >= 0 ? formatMoney(budgetRemaining) : `-${formatMoney(Math.abs(budgetRemaining))}`;
+      budgetLeftEl.className = `font-mono font-extrabold text-lg sm:text-2xl tracking-tight truncate ${
+        budgetRemaining < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'
+      }`;
+      document.getElementById('kpi-budget-limit').textContent = `of ${formatMoney(budgetLimit)} limit`;
+
+      // Update Interactive Budget Progress Bar & Color Warnings
+/* ... existing code ... -->
+      chartEl.innerHTML = days.map(d => {
+        const heightPct = d.sum > 0 ? Math.max(10, Math.round((d.sum / maxVal) * 100)) : 4;
+        const barColor = d.isToday
+          ? 'bg-gradient-to-t from-sky-600 to-indigo-500 shadow-sm shadow-sky-500/20'
+          : d.sum > 0
+            ? 'bg-gradient-to-t from-sky-400/75 to-indigo-400/75 hover:from-sky-500 hover:to-indigo-500'
+            : 'bg-slate-200/80 dark:bg-slate-800/70';
+
+        return `
+          <div class="flex-1 flex flex-col items-center h-full justify-end group relative">
+            <!-- Tooltip on Hover -->
+            <div class="opacity-0 group-hover:opacity-100 transition pointer-events-none absolute -top-6 bg-slate-800 text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-md shadow-md whitespace-nowrap z-10">
+              ${formatMoney(d.sum)}
+            </div>
+            <div class="w-full max-w-[34px] rounded-t-xl transition-all duration-500 ${barColor}" style="height: ${heightPct}%"></div>
+            <span class="text-[10px] font-semibold mt-2 ${d.isToday ? 'text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-500 dark:text-slate-400'}">${d.label}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTopCategoriesMini(expenseList, totalSpend) {
+/* ... existing code ... -->
